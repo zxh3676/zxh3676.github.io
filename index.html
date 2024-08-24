@@ -1,1 +1,144 @@
-<img src="a.jpg">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>反应速度测试</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        #circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background-color: red;
+            display: none;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #333;
+        }
+        #evaluation {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #d9534f;
+        }
+        #countdown {
+            font-size: 24px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div>
+        <div id="circle"></div>
+        <div id="message"></div>
+        <div id="evaluation"></div>
+        <button id="startButton">开始测试</button>
+        <div id="countdown"></div>
+    </div>
+
+    <script>
+        const circle = document.getElementById('circle');
+        const message = document.getElementById('message');
+        const evaluation = document.getElementById('evaluation');
+        const startButton = document.getElementById('startButton');
+        const countdownDisplay = document.getElementById('countdown');
+        
+        let reactionTimes = [];
+        let countdown;
+        let testCount = 0;
+        let startTime;
+
+        function startTest() {
+            testCount = 0;
+            reactionTimes = [];
+            startButton.style.display = 'none';
+            countdownDisplay.textContent = '';
+            evaluation.textContent = '';
+            nextRound();
+        }
+
+        function nextRound() {
+            if (testCount < 5) {
+                countdown = 3;
+                countdownDisplay.textContent = `倒计时: ${countdown}`;
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownDisplay.textContent = `倒计时: ${countdown}`;
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        startRound();
+                    }
+                }, 1000);
+            } else {
+                displayResult();
+            }
+        }
+
+        function startRound() {
+            message.textContent = '';
+            circle.style.backgroundColor = 'red';
+            circle.style.display = 'block';
+
+            const randomDelay = Math.random() * 9000 + 1000; // 随机1.00~10.00秒
+
+            setTimeout(() => {
+                circle.style.backgroundColor = 'green';
+                startTime = Date.now();
+            }, randomDelay);
+
+            // 对鼠标点击和触摸事件都进行处理
+            function handleReaction() {
+                if (circle.style.backgroundColor === 'green') {
+                    const reactionTime = Date.now() - startTime;
+                    reactionTimes.push(reactionTime);
+                    message.textContent = `反应时间: ${reactionTime} 毫秒`;
+                    circle.style.display = 'none';
+                    testCount++;
+                    setTimeout(nextRound, 1000);
+                }
+            }
+
+            // 监听鼠标和触摸事件
+            circle.onmousedown = handleReaction;
+            circle.ontouchstart = handleReaction;
+        }
+
+        function displayResult() {
+            const averageTime = reactionTimes.reduce((a, b) => a + b, 0) / reactionTimes.length;
+            let evaluationText;
+
+            if (averageTime <= 200) {
+                evaluationText = "我能反应子弹的老弟！";
+            } else if (averageTime <= 300) {
+                evaluationText = "不错哦，反应蛮快的~";
+            } else if (averageTime <= 400) {
+                evaluationText = "还行嘛，不过还能更快！";
+            } else if (averageTime <= 500) {
+                evaluationText = "有点慢哦，多练练吧~";
+            } else {
+                evaluationText = "加油！感觉你还在起床的状态呢~";
+            }
+
+            message.textContent = `平均反应时间: ${averageTime.toFixed(2)} 毫秒`;
+            evaluation.textContent = `${evaluationText}`;
+            startButton.style.display = 'block';
+        }
+
+        startButton.onclick = startTest;
+    </script>
+
+</body>
+</html>
+
